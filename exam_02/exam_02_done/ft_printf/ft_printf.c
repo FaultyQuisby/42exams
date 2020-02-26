@@ -6,7 +6,7 @@
 /*   By: micarras <micarras@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/11 14:25:05 by micarras          #+#    #+#             */
-/*   Updated: 2020/02/20 12:10:59 by micarras         ###   ########.fr       */
+/*   Updated: 2020/02/26 21:38:53 by micarras         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ typedef struct          s_modifier
     char                conversion;
     int                 size;
     int                 mindex;
-    char                minus;
     int                 precision;
 }                       t_modifier;
 
@@ -266,10 +265,7 @@ int
         ft_darray_reappend(d, after - width, after);
     }
     if (m->size < 0 && m->precision == -1)
-    {
         m->size = (m->size < 0 ? -(m->size) : (m->size));
-        m->minus = 1;
-    }
     return (len);
 }
 
@@ -308,7 +304,7 @@ char
 const char
     *pf_match(const char *s, t_modifier *m)
 {
-    *m = (t_modifier){0, 0, 0, 0, -1};
+    *m = (t_modifier){0, 0, 0, -1};
     while(*(++s))
     {
         if (*s == '.')
