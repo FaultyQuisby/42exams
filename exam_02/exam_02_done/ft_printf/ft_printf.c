@@ -6,7 +6,7 @@
 /*   By: micarras <micarras@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/11 14:25:05 by micarras          #+#    #+#             */
-/*   Updated: 2020/02/26 21:38:53 by micarras         ###   ########.fr       */
+/*   Updated: 2020/02/27 17:31:32 by micarras         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,10 @@ typedef struct          s_modifier
 {
     char                conversion;
     int                 size;
-    int                 mindex;
     int                 precision;
 }                       t_modifier;
+
+int ft_isnum(const char c) {return (c >= '0' && c <= '9');}
 
 size_t
     ft_strlen(char *str)
@@ -229,7 +230,7 @@ int
 }
 
 int
-    pf_print(t_modifier *m, t_darray *d, va_list ap)
+    pf_call(t_modifier *m, t_darray *d, va_list ap)
 {
     int         i;
     const char  *c = "sdx";
@@ -254,7 +255,7 @@ int
     int         width;
     int         len;
 
-    if ((width = pf_print(m, d, ap)) == -1)
+    if ((width = pf_call(m, d, ap)) == -1)
         return (-1);
     after = d->size;
     len = width;
@@ -265,7 +266,7 @@ int
         ft_darray_reappend(d, after - width, after);
     }
     if (m->size < 0 && m->precision == -1)
-        m->size = (m->size < 0 ? -(m->size) : (m->size));
+        m->size = -(m->size);
     return (len);
 }
 
@@ -302,23 +303,23 @@ char
 }
 
 const char
-    *pf_match(const char *s, t_modifier *m)
+    *pf_set_m_values(const char *s, t_modifier *m)
 {
-    *m = (t_modifier){0, 0, 0, -1};
+	*m = (t_modifier){0, 0, -1};
     while(*(++s))
     {
         if (*s == '.')
         {
             m->precision = 0;
             s++;
-            while (*s >= '0' && *s <= '9')
+            while (ft_isnum(*s))
                 m->precision = 10 * (m->precision) + *s++ - '0';
             s--;
         }
-        else if (*s >= '0' && *s <= '9')
+        else if (ft_isnum(*s))
         {
             m->size = 0;
-            while (*s >= '0' && *s <= '9')
+            while (ft_isnum(*s))
                 m->size = 10 * (m->size) + *s++ - '0';
             s--;
         }
@@ -347,15 +348,12 @@ int
     {
         if (*s == '%')
         {
-            s = (char *)pf_match(s, &m);
+            s = (char *)pf_set_m_values(s, &m);
             if (m.conversion && pf_convert(&m, &d, dap) == -1)
             {
-                ft_darray_resize(&d, m.mindex);
-                ft_darray_trim(&d);
-                ret = d.data;
+				free(d.data);
                 return (-1);
             }
-            m.mindex = d.size;
         }
         s = pf_next_specifier(s, &d);
     }
